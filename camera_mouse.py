@@ -25,14 +25,14 @@ DisplayResolutionX = user32.GetSystemMetrics(78) # 1920
 DisplayResolutionY = user32.GetSystemMetrics(79) # 1080
 
 # My Yellow Highlighter
-#mouseColor = ((1/255)*108, (1/255)*169, (1/255)*173)
+#mouseColor = (108, 169, 173)
 
 # Red
-mouseColor = (0, 0, 1)
+mouseColor = (0, 0, 255)
 
 def updateMouse(p1, p2):
     init = win32gui.GetCursorPos()
-    x = init[0] + (p2[0] - p1[0]) * xSpeed
+    x = init[0] + (p1[0] - p2[0]) * xSpeed
     y = init[1] + (p2[1] - p1[1]) * ySpeed
 
     if (x < 0):
@@ -61,14 +61,7 @@ def mouse_driver():
 
     red[:] = mouseColor
 
-    # Mirror the image to make it intutive
-    mirrored_frame = cv2.flip(frame, 1)
-
-    mirrored_frame = mirrored_frame.astype(np.float32)
-
-    mirrored_frame = mirrored_frame/255
-
-    diff_frame = red - mirrored_frame
+    diff_frame = red - frame
 
     r = diff_frame[:,:,0]
     g = diff_frame[:,:,1]
@@ -79,8 +72,6 @@ def mouse_driver():
     b2 = np.square(b)
 
     d = np.sqrt(r2 + g2 + b2)
-
-    d = d * 255
 
     ret, thresh = cv2.threshold(d, 128, 255, cv2.THRESH_BINARY_INV)
     
@@ -120,8 +111,9 @@ def mouse_driver():
         isFirst = True
 
     # Display the original frame
-    cv2.imshow('original',mirrored_frame)
-    cv2.imshow('thresh',thresh)
+    # Mirror the image to show movement in te right direction
+    cv2.imshow('original',cv2.flip(frame, 1))
+    cv2.imshow('thresh',cv2.flip(thresh, 1))
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
